@@ -30,7 +30,8 @@ class MainActivity : AppCompatActivity() {
         COPY_FILES_FROM_OLD_TELEGRAM,
         UNINSTALL_OLD_APP,
         INSTALL_NEW_APP,
-        COPY_FILES_TO_TELEGRAM
+        COPY_FILES_TO_TELEGRAM,
+        UNINSTALL_SELF
     }
 
     private var checkAppThread: Thread? = null
@@ -70,6 +71,8 @@ class MainActivity : AppCompatActivity() {
                     } catch (ignored: Exception) {
                     }
                 }
+            } else if (step == Step.UNINSTALL_SELF) {
+                uninstallSelf()
             }
         }
 
@@ -78,9 +81,11 @@ class MainActivity : AppCompatActivity() {
 
         contract = TelegramActivityContract(fileToUri(File(filesDir, "received_files/data.zip")), zipPassword)
         telegramLauncher = registerForActivityResult(contract) { result ->
-            findTelegramActivity()?.let {
-                //contract.uri = null
-                //telegramLauncher.launch(it)
+            if (result) {
+                step = Step.UNINSTALL_SELF
+                runOnUiThread {
+                    updateUI()
+                }
             }
         }
 
@@ -171,6 +176,8 @@ class MainActivity : AppCompatActivity() {
                 button.text = "Install New Telegram App"
             } else if (step == Step.COPY_FILES_TO_TELEGRAM) {
                 button.text = "Copy Files to Telegram"
+            } else if (step == Step.UNINSTALL_SELF) {
+                button.text = "Uninstall Updater"
             }
         }
     }
@@ -186,6 +193,12 @@ class MainActivity : AppCompatActivity() {
         val uri = fileToUri(File(filesDir, "received_files/telegram.apk"))
         intent.setDataAndType(uri, "application/vnd.android.package-archive")
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        startActivity(intent)
+    }
+
+    private fun uninstallSelf() {
+        val intent = Intent(Intent.ACTION_DELETE)
+        intent.data = Uri.parse("package:" + packageName)
         startActivity(intent)
     }
 
@@ -207,6 +220,8 @@ class MainActivity : AppCompatActivity() {
                     step = Step.COPY_FILES_TO_TELEGRAM
                     runOnUiThread{ updateUI() }
                 }
+            } else {
+                break
             }
             Thread.sleep(100)
         }
