@@ -58,6 +58,8 @@ class MainActivity : AppCompatActivity() {
 
         progressBar = findViewById(R.id.progressBar)
 
+
+        step = Step.COPY_FILES_FROM_OLD_TELEGRAM
         button = findViewById(R.id.button)
         button.setOnClickListener {
             if (step == Step.UNINSTALL_OLD_APP) {
@@ -165,7 +167,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUI() {
         if (step == Step.COPY_FILES_FROM_OLD_TELEGRAM) {
-            progressBar.visibility = View.VISIBLE
+            if (intent.data != null) {
+                progressBar.visibility = View.VISIBLE
+            }
             button.visibility = View.GONE
         } else {
             progressBar.visibility = View.GONE
@@ -220,7 +224,7 @@ class MainActivity : AppCompatActivity() {
                     step = Step.COPY_FILES_TO_TELEGRAM
                     runOnUiThread{ updateUI() }
                 }
-            } else {
+            } else if (step != Step.COPY_FILES_FROM_OLD_TELEGRAM) {
                 break
             }
             Thread.sleep(100)
