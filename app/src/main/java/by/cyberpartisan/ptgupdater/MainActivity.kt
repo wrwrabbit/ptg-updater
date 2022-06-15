@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
     private val preferences
         get() = getSharedPreferences("config", MODE_PRIVATE)
     private var zipPassword: ByteArray?
-        get() = Base64.decode(preferences.getString("zipPassword", null), Base64.DEFAULT)
+        get() = preferences.getString("zipPassword", null)?.let { Base64.decode(it, Base64.DEFAULT) }
         set(x) { preferences.edit().putString("zipPassword", Base64.encodeToString(x, Base64.DEFAULT)).apply() }
     private var telegramPackageName: String?
         get() = preferences.getString("telegramPackageName", null)
@@ -210,7 +210,9 @@ class MainActivity : AppCompatActivity() {
         while (true) {
             val updaterPackage = try {
                 val pm: PackageManager = packageManager
-                pm.getPackageInfo(telegramPackageName!!, 0)
+                telegramPackageName?.let {
+                    pm.getPackageInfo(it, 0)
+                }
             } catch (e: PackageManager.NameNotFoundException) {
                 null
             }
