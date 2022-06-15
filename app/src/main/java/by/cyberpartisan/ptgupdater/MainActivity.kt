@@ -58,8 +58,6 @@ class MainActivity : AppCompatActivity() {
 
         progressBar = findViewById(R.id.progressBar)
 
-
-        step = Step.COPY_FILES_FROM_OLD_TELEGRAM
         button = findViewById(R.id.button)
         button.setOnClickListener {
             if (step == Step.UNINSTALL_OLD_APP) {
