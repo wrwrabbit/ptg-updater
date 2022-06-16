@@ -211,7 +211,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun installNewApp() {
         val intent = Intent(Intent.ACTION_VIEW)
-        val uri = fileToUri(File(filesDir, "received_files/telegram.apk"))
+        val uri = if (Build.VERSION.SDK_INT >= 24) {
+            fileToUri(File(filesDir, "received_files/telegram.apk"))
+        } else {
+            newTelegramUri
+        }
         intent.setDataAndType(uri, "application/vnd.android.package-archive")
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
         startActivity(intent)
