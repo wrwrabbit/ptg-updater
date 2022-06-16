@@ -46,10 +46,16 @@ class MainActivity : AppCompatActivity() {
     private var telegramPackageName: String?
         get() = preferences.getString("telegramPackageName", null)
         set(x) { preferences.edit().putString("telegramPackageName", x).apply() }
+    private var dataUri: Uri?
+        get() = preferences.getString("dataUri", null)?.let { Uri.parse(it) }
+        set(x) { preferences.edit().putString("dataUri", x.toString()).apply() }
+    private var newTelegramUri: Uri?
+        get() = preferences.getString("newTelegramUri", null)?.let { Uri.parse(it) }
+        set(x) { preferences.edit().putString("newTelegramUri", x.toString()).apply() }
     private var step: Step
-        get() = Step.valueOf(preferences.getString("step", "COPY_FILES")!!)
+        get() = Step.valueOf(preferences.getString("step", "COPY_FILES_FROM_OLD_TELEGRAM")!!)
         set(x) { preferences.edit().putString("step", x.toString()).apply() }
-    private lateinit var contract: TelegramActivityContract
+    private var contract: TelegramActivityContract? = null
     private lateinit var telegramLauncher: ActivityResultLauncher<ActivityInfo>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,30 +85,43 @@ class MainActivity : AppCompatActivity() {
         intent.getByteArrayExtra("password")?.let { zipPassword = it }
         intent.getStringExtra("packageName")?.let { telegramPackageName = it }
 
-        contract = TelegramActivityContract(fileToUri(File(filesDir, "received_files/data.zip")), zipPassword)
-        telegramLauncher = registerForActivityResult(contract) { result ->
-            if (result) {
-                step = Step.UNINSTALL_SELF
-                runOnUiThread {
-                    updateUI()
-                }
-            }
-        }
-
         if (checkAppThread == null) {
             checkAppThread = Thread{ checkApp() }
             checkAppThread?.start()
         }
 
         if (intent.data != null) {
-            step = Step.COPY_FILES_FROM_OLD_TELEGRAM
-            if (ContextCompat.checkSelfPermission( this, android.Manifest.permission.READ_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED ) {
-                ActivityCompat.requestPermissions( this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 100)
+            if (Build.VERSION.SDK_INT >= 24) {
+                step = Step.COPY_FILES_FROM_OLD_TELEGRAM
+                if (ContextCompat.checkSelfPermission( this, android.Manifest.permission.READ_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED ) {
+                    ActivityCompat.requestPermissions( this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 100)
+                } else {
+                    receiveFiles()
+                }
             } else {
-                receiveFiles()
+                dataUri = intent.data
+                intent.getParcelableExtra<Uri>("telegramApk")?.let { newTelegramUri = it }
+                step = Step.UNINSTALL_OLD_APP
+                updateUI()
+                contract = TelegramActivityContract(dataUri, zipPassword)
             }
         } else {
             updateUI()
+        }
+        if (Build.VERSION.SDK_INT >= 24) {
+            contract = TelegramActivityContract(fileToUri(File(filesDir, "received_files/data.zip")), zipPassword)
+        } else if (dataUri != null) {
+            contract = TelegramActivityContract(dataUri, zipPassword)
+        }
+        contract?.let {
+            telegramLauncher = registerForActivityResult(it) { result ->
+                if (result) {
+                    step = Step.UNINSTALL_SELF
+                    runOnUiThread {
+                        updateUI()
+                    }
+                }
+            }
         }
     }
 
