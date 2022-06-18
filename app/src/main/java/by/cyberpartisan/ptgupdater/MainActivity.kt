@@ -1,6 +1,5 @@
 package by.cyberpartisan.ptgupdater
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -67,72 +66,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        progressBar = findViewById(R.id.progressBar)
-
-        button = findViewById(R.id.button)
-        button.setOnClickListener {
-            if (step == Step.UNINSTALL_OLD_APP) {
-                uninstallOldApp()
-            } else if (step == Step.INSTALL_NEW_APP) {
-                installNewApp()
-            } else if (step == Step.COPY_FILES_TO_TELEGRAM) {
-                findTelegramActivity()?.let {
-                    try {
-                        telegramLauncher.launch(it)
-                    } catch (ignored: Exception) {
-                    }
-                }
-            } else if (step == Step.UNINSTALL_SELF) {
-                uninstallSelf()
-            }
-        }
+        findViews()
 
         intent.getByteArrayExtra("password")?.let { zipPassword = it }
         intent.getStringExtra("packageName")?.let { telegramPackageName = it }
 
-        if (checkAppThread == null) {
-            checkAppThread = Thread{ checkApp() }
-            checkAppThread?.start()
-        }
-
+        createTread()
         if (intent.data != null) {
-            if (Build.VERSION.SDK_INT >= 24) {
-                step = Step.COPY_FILES_FROM_OLD_TELEGRAM
-                if (ContextCompat.checkSelfPermission( this, android.Manifest.permission.READ_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED ) {
-                    ActivityCompat.requestPermissions( this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 100)
-                } else {
-                    receiveFiles()
-                }
-            } else {
-                dataUri = intent.data
-                intent.getParcelableExtra<Uri>("telegramApk")?.let { newTelegramUri = it }
-                step = Step.UNINSTALL_OLD_APP
-                updateUI()
-                contract = TelegramActivityContract(dataUri, zipPassword)
-            }
-            localeOverride = intent.getStringExtra("language")
+            saveIntentData()
         } else {
             updateUI()
         }
-        localeOverride?.let {
-            setLocale(it)
-        }
-        if (Build.VERSION.SDK_INT >= 24) {
-            contract = TelegramActivityContract(fileToUri(File(filesDir, "received_files/data.zip")), zipPassword)
-        } else if (dataUri != null) {
-            contract = TelegramActivityContract(dataUri, zipPassword)
-        }
-        contract?.let {
-            telegramLauncher = registerForActivityResult(it) { result ->
-                if (result) {
-                    step = Step.UNINSTALL_SELF
-                    runOnUiThread {
-                        updateUI()
-                    }
-                }
-            }
-        }
+        localeOverride?.let { setLocale(it) }
+        createTelegramLauncher()
     }
 
     override fun onResume() {
@@ -143,10 +89,7 @@ class MainActivity : AppCompatActivity() {
     private fun receiveFiles() {
         Thread {
             runOnUiThread { progressBar.visibility = View.VISIBLE }
-            val zipFile = File(filesDir, "full.zip")
-            if (zipFile.exists()) {
-                zipFile.delete()
-            }
+            val zipFile = getFileAndDeleteIfExists("full.zip")
             copyFileFromTelegram(intent.data!!, "full.zip")
 
             val dir = File(filesDir, "received_files")
@@ -300,6 +243,85 @@ class MainActivity : AppCompatActivity() {
         } else {
             resources.updateConfiguration(configuration, displayMetrics)
         }
+    }
+
+    private fun findViews() {
+        progressBar = findViewById(R.id.progressBar)
+
+        button = findViewById(R.id.button)
+        button.setOnClickListener { onClickButton() }
+    }
+
+    private fun createTread() {
+        if (checkAppThread == null) {
+            checkAppThread = Thread{ checkApp() }
+            checkAppThread?.start()
+        }
+    }
+
+    private fun saveIntentData() {
+        if (Build.VERSION.SDK_INT >= 24) {
+            step = Step.COPY_FILES_FROM_OLD_TELEGRAM
+            if (ContextCompat.checkSelfPermission( this, android.Manifest.permission.READ_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED ) {
+                ActivityCompat.requestPermissions( this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 100)
+            } else {
+                receiveFiles()
+            }
+        } else {
+            dataUri = intent.data
+            intent.getParcelableExtra<Uri>("telegramApk")?.let { newTelegramUri = it }
+            step = Step.UNINSTALL_OLD_APP
+            updateUI()
+            contract = TelegramActivityContract(dataUri, zipPassword)
+        }
+        localeOverride = intent.getStringExtra("language")
+    }
+
+    private fun onClickButton() {
+        if (step == Step.UNINSTALL_OLD_APP) {
+            uninstallOldApp()
+        } else if (step == Step.INSTALL_NEW_APP) {
+            installNewApp()
+        } else if (step == Step.COPY_FILES_TO_TELEGRAM) {
+            findTelegramActivity()?.let {
+                try {
+                    telegramLauncher.launch(it)
+                } catch (ignored: Exception) {
+                }
+            }
+        } else if (step == Step.UNINSTALL_SELF) {
+            uninstallSelf()
+        }
+    }
+
+    private fun createTelegramLauncher() {
+        if (Build.VERSION.SDK_INT >= 24) {
+            contract = TelegramActivityContract(fileToUri(File(filesDir, "received_files/data.zip")), zipPassword)
+        } else if (dataUri != null) {
+            contract = TelegramActivityContract(dataUri, zipPassword)
+        }
+        contract?.let {
+            telegramLauncher = registerForActivityResult(it) { result ->
+                if (result) {
+                    step = Step.UNINSTALL_SELF
+                    runOnUiThread {
+                        updateUI()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getFileAndDeleteIfExists(name: String): File {
+        val file = File(filesDir, name)
+        if (file.exists()) {
+            if (file.isDirectory) {
+                file.deleteRecursively()
+            } else {
+                file.delete()
+            }
+        }
+        return file
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
