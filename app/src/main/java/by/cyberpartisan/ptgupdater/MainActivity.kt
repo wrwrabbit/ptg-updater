@@ -175,8 +175,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun uninstallSelf() {
+        deleteFileByUri(dataUri)
+        deleteFileByUri(newTelegramUri)
+
         val intent = Intent(Intent.ACTION_DELETE)
-        intent.data = Uri.parse("package:" + packageName)
+        intent.data = Uri.parse("package:$packageName")
         startActivity(intent)
     }
 
@@ -322,6 +325,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return file
+    }
+
+    private fun deleteFileByUri(uri: Uri?) {
+        uri?.let { u ->
+            u.path?.let { path ->
+                File(path).delete()
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
