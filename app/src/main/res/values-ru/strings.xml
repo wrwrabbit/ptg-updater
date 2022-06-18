@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uninstall_old_telegram_app">Удалить старый партизанский телеграм</string>
+    <string name="install_new_telegram_app">Установить новый партизанский телеграм</string>
+    <string name="copy_files_to_telegram">Скопировать данные в новый телеграм</string>
+    <string name="uninstall_updater">Удалить приложение Updater</string>
+</resources>

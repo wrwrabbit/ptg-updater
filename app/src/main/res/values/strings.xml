@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">PtgUpdater</string>
+    <string name="app_name" translatable="false">PtgUpdater</string>
+    <string name="uninstall_old_telegram_app">Uninstall Old Telegram App</string>
+    <string name="install_new_telegram_app">Install New Telegram App</string>
+    <string name="copy_files_to_telegram">Copy Files to Telegram</string>
+    <string name="uninstall_updater">Uninstall Updater</string>
 </resources>

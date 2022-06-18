@@ -1,5 +1,6 @@
 package by.cyberpartisan.ptgupdater
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -9,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Base64
+import android.util.DisplayMetrics
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
@@ -23,6 +25,7 @@ import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -55,6 +58,9 @@ class MainActivity : AppCompatActivity() {
     private var step: Step
         get() = Step.valueOf(preferences.getString("step", "COPY_FILES_FROM_OLD_TELEGRAM")!!)
         set(x) { preferences.edit().putString("step", x.toString()).apply() }
+    private var localeOverride: String?
+        get() = preferences.getString("localeOverride", null)
+        set(x) { preferences.edit().putString("localeOverride", x).apply() }
     private var contract: TelegramActivityContract? = null
     private lateinit var telegramLauncher: ActivityResultLauncher<ActivityInfo>
 
@@ -105,8 +111,12 @@ class MainActivity : AppCompatActivity() {
                 updateUI()
                 contract = TelegramActivityContract(dataUri, zipPassword)
             }
+            localeOverride = intent.getStringExtra("language")
         } else {
             updateUI()
+        }
+        localeOverride?.let {
+            setLocale(it)
         }
         if (Build.VERSION.SDK_INT >= 24) {
             contract = TelegramActivityContract(fileToUri(File(filesDir, "received_files/data.zip")), zipPassword)
@@ -192,13 +202,13 @@ class MainActivity : AppCompatActivity() {
             progressBar.visibility = View.GONE
             button.visibility = View.VISIBLE
             if (step == Step.UNINSTALL_OLD_APP) {
-                button.text = "Uninstall Old Telegram App"
+                button.text = resources.getString(R.string.uninstall_old_telegram_app)
             } else if (step == Step.INSTALL_NEW_APP) {
-                button.text = "Install New Telegram App"
+                button.text = resources.getString(R.string.install_new_telegram_app)
             } else if (step == Step.COPY_FILES_TO_TELEGRAM) {
-                button.text = "Copy Files to Telegram"
+                button.text = resources.getString(R.string.copy_files_to_telegram)
             } else if (step == Step.UNINSTALL_SELF) {
-                button.text = "Uninstall Updater"
+                button.text = resources.getString(R.string.uninstall_updater)
             }
         }
     }
@@ -271,6 +281,24 @@ class MainActivity : AppCompatActivity() {
             FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file)
         } else {
             Uri.fromFile(file)
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun setLocale(languageCode: String) {
+        val locale = Locale(languageCode)
+        val resources = resources
+        val configuration = resources.getConfiguration()
+        val displayMetrics: DisplayMetrics = resources.getDisplayMetrics()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            configuration.setLocale(locale)
+        } else {
+            configuration.locale = locale
+        }
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+            applicationContext.createConfigurationContext(configuration)
+        } else {
+            resources.updateConfiguration(configuration, displayMetrics)
         }
     }
 
