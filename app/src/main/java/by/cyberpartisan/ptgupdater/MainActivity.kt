@@ -13,6 +13,7 @@ import android.util.DisplayMetrics
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -37,6 +38,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var checkAppThread: Thread? = null
+
+    private lateinit var stepTextView: TextView
+    private lateinit var descriptionTextView: TextView
 
     private lateinit var button: Button
     private lateinit var progressBar: ProgressBar
@@ -139,18 +143,31 @@ class MainActivity : AppCompatActivity() {
         if (step == Step.COPY_FILES_FROM_OLD_TELEGRAM) {
             if (intent.data != null) {
                 progressBar.visibility = View.VISIBLE
+                descriptionTextView.text = ""
+            } else {
+                progressBar.visibility = View.GONE
+                descriptionTextView.text = resources.getString(R.string.back_to_ptr_description)
             }
+            stepTextView.text = ""
             button.visibility = View.GONE
         } else {
             progressBar.visibility = View.GONE
             button.visibility = View.VISIBLE
             if (step == Step.UNINSTALL_OLD_APP) {
+                stepTextView.text = resources.getString(R.string.step4)
+                descriptionTextView.text = resources.getString(R.string.uninstall_old_telegram_app_description)
                 button.text = resources.getString(R.string.uninstall_old_telegram_app)
             } else if (step == Step.INSTALL_NEW_APP) {
+                stepTextView.text = resources.getString(R.string.step5)
+                descriptionTextView.text = resources.getString(R.string.install_new_telegram_app_description)
                 button.text = resources.getString(R.string.install_new_telegram_app)
             } else if (step == Step.COPY_FILES_TO_TELEGRAM) {
-                button.text = resources.getString(R.string.copy_files_to_telegram)
+                stepTextView.text = resources.getString(R.string.step6)
+                descriptionTextView.text = resources.getString(R.string.transfer_files_to_telegram_description)
+                button.text = resources.getString(R.string.transfer_files_to_telegram)
             } else if (step == Step.UNINSTALL_SELF) {
+                stepTextView.text = resources.getString(R.string.step7)
+                descriptionTextView.text = resources.getString(R.string.uninstall_updater_description)
                 button.text = resources.getString(R.string.uninstall_updater)
             }
         }
@@ -249,6 +266,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun findViews() {
+        stepTextView = findViewById(R.id.step)
+        descriptionTextView = findViewById(R.id.description)
+
         progressBar = findViewById(R.id.progressBar)
 
         button = findViewById(R.id.button)

@@ -1,7 +1,21 @@
 <resources>
     <string name="app_name" translatable="false">PtgUpdater</string>
+    <string name="back_to_ptr_description">Updater should receive data from PTelegram. Go back to partisan Telegram and continue with the installation there for now.</string>
+
+    <string name="step4">Step 4</string>
+    <string name="uninstall_old_telegram_app_description">Updater received all data from PTegegram. Now you need to uninstall it in order to install the new version. Don\'t worry, all your data including accounts, secret chats, partisan settings, false passcodes will be transferred to the new version of the app.</string>
     <string name="uninstall_old_telegram_app">Uninstall Old Telegram App</string>
+
+    <string name="step5">Step 5</string>
+    <string name="install_new_telegram_app_description">The old version of PTegegram has been removed. Now you need to install PTelegram 3.0. Once installed, go back to Updater to transfer the data.</string>
     <string name="install_new_telegram_app">Install New Telegram App</string>
-    <string name="copy_files_to_telegram">Copy Files to Telegram</string>
+
+    <string name="step6">Step 6</string>
+    <string name="transfer_files_to_telegram_description">The new version of PTelegram is installed, but it is still empty. Let\'s fill it with data from the old version.</string>
+    <string name="transfer_files_to_telegram">Copy Files to Telegram</string>
+
+    <string name="step7">Congratulations!</string>
+    <string name="uninstall_updater_description">Telegram updated to version 3.0. Updater is no longer needed and can be removed.</string>
     <string name="uninstall_updater">Uninstall Updater</string>
+
 </resources>

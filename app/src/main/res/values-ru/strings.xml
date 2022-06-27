@@ -1,7 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="back_to_ptr_description">Updater должен получить данные от PTelegram. Вернитесь в партизанский Телеграм и продолжите установку там пока что.</string>
+
+    <string name="step4">Шаг 4</string>
+    <string name="uninstall_old_telegram_app_description">Updater получил все данные от PTegegram. Теперь необходимо удалить его, чтобы установить новую верию. Не волнуйтесь, все ваши данные, включая аккаунты, секретные чаты, партизанские настройки, ложные код-пароли будут перенесены в новую версию приложения.</string>
     <string name="uninstall_old_telegram_app">Удалить старый партизанский телеграм</string>
+
+    <string name="step5">Шаг 5</string>
+    <string name="install_new_telegram_app_description">Старая версия PTegegram удалена. Теперь необходимо установить PTelegram 3.0. После установки вернитесь обратно в Updater, чтобы передать данные.</string>
     <string name="install_new_telegram_app">Установить новый партизанский телеграм</string>
-    <string name="copy_files_to_telegram">Скопировать данные в новый телеграм</string>
+
+    <string name="step6">Шаг 6</string>
+    <string name="transfer_files_to_telegram_description">Новая версия PTelegram установлена, но она пока пуста. Давайте наполним её данными из старой версии.</string>
+    <string name="transfer_files_to_telegram">Скопировать данные в новый телеграм</string>
+
+    <string name="step7">Шаг 7</string>
+    <string name="uninstall_updater_description">PTelegram обновлён до версии 3.0. Updater теперь не нужен и его можно удалить.</string>
     <string name="uninstall_updater">Удалить приложение Updater</string>
 </resources>
