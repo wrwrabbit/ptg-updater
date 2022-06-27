@@ -202,29 +202,38 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkApp() {
         while (true) {
-            val updaterPackage = try {
-                val pm: PackageManager = packageManager
-                telegramPackageName?.let {
-                    pm.getPackageInfo(it, 0)
-                }
-            } catch (e: PackageManager.NameNotFoundException) {
-                null
-            }
             if (step == Step.UNINSTALL_OLD_APP) {
-                if (updaterPackage == null) {
+                if (!isTelegramInstalled()) {
                     step = Step.INSTALL_NEW_APP
                     runOnUiThread{ updateUI() }
                 }
             } else if (step == Step.INSTALL_NEW_APP) {
-                if (updaterPackage != null) {
+                if (isTelegramInstalled()) {
                     step = Step.COPY_FILES_TO_TELEGRAM
                     runOnUiThread{ updateUI() }
                 }
-            } else if (step != Step.COPY_FILES_FROM_OLD_TELEGRAM) {
+            } else if (step == Step.COPY_FILES_FROM_OLD_TELEGRAM) {
+                if (!isTelegramInstalled()) {
+                    step = Step.INSTALL_NEW_APP
+                    runOnUiThread{ updateUI() }
+                }
+            } else {
                 break
             }
             Thread.sleep(100)
         }
+    }
+
+    private fun isTelegramInstalled(): Boolean {
+        val telegramPackage = try {
+            val pm: PackageManager = packageManager
+            telegramPackageName?.let {
+                pm.getPackageInfo(it, 0)
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
+        }
+        return telegramPackage != null
     }
 
     private fun findTelegramActivity(): ActivityInfo? {
