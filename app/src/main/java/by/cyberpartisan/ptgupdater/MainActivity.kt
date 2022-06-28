@@ -212,12 +212,12 @@ class MainActivity : AppCompatActivity() {
                     step = Step.COPY_FILES_TO_TELEGRAM
                     runOnUiThread{ updateUI() }
                 }
-            } else if (step == Step.COPY_FILES_FROM_OLD_TELEGRAM) {
+            } else if (step == Step.COPY_FILES_TO_TELEGRAM) {
                 if (!isTelegramInstalled()) {
                     step = Step.INSTALL_NEW_APP
                     runOnUiThread{ updateUI() }
                 }
-            } else {
+            } else if (step != Step.COPY_FILES_FROM_OLD_TELEGRAM) {
                 break
             }
             Thread.sleep(100)
