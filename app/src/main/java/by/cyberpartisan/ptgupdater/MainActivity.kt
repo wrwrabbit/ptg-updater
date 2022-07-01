@@ -20,6 +20,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toFile
+import androidx.core.net.toUri
 import net.lingala.zip4j.ZipFile
 import org.apache.commons.io.IOUtils
 import java.io.File
@@ -31,10 +32,12 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     enum class Step {
         COPY_FILES_FROM_OLD_TELEGRAM,
+        OLD_TELEGRAM_FILES_CORRUPTED,
         UNINSTALL_OLD_APP,
         INSTALL_NEW_APP,
         COPY_FILES_TO_TELEGRAM,
-        UNINSTALL_SELF
+        UNINSTALL_SELF,
+        ERROR
     }
 
     private var checkAppThread: Thread? = null
@@ -52,12 +55,6 @@ class MainActivity : AppCompatActivity() {
     private var telegramPackageName: String?
         get() = preferences.getString("telegramPackageName", null)
         set(x) { preferences.edit().putString("telegramPackageName", x).apply() }
-    private var dataUri: Uri?
-        get() = preferences.getString("dataUri", null)?.let { Uri.parse(it) }
-        set(x) { preferences.edit().putString("dataUri", x.toString()).apply() }
-    private var newTelegramUri: Uri?
-        get() = preferences.getString("newTelegramUri", null)?.let { Uri.parse(it) }
-        set(x) { preferences.edit().putString("newTelegramUri", x.toString()).apply() }
     private var step: Step
         get() = Step.valueOf(preferences.getString("step", "COPY_FILES_FROM_OLD_TELEGRAM")!!)
         set(x) { preferences.edit().putString("step", x.toString()).apply() }
@@ -150,6 +147,17 @@ class MainActivity : AppCompatActivity() {
             }
             stepTextView.text = ""
             button.visibility = View.GONE
+        } else if (step == Step.OLD_TELEGRAM_FILES_CORRUPTED) {
+            progressBar.visibility = View.GONE
+            descriptionTextView.text = resources.getString(R.string.back_to_ptr_error_description)
+            stepTextView.text = ""
+            progressBar.visibility = View.GONE
+            button.visibility = View.GONE
+        } else if (step == Step.ERROR) {
+            stepTextView.text = resources.getString(R.string.stepError)
+            descriptionTextView.text = resources.getString(R.string.error_description)
+            progressBar.visibility = View.GONE
+            button.visibility = View.GONE
         } else {
             progressBar.visibility = View.GONE
             button.visibility = View.VISIBLE
@@ -180,21 +188,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun installNewApp() {
-        val intent = Intent(Intent.ACTION_VIEW)
-        val uri = if (Build.VERSION.SDK_INT >= 24) {
-            fileToUri(File(filesDir, "received_files/telegram.apk"))
-        } else {
-            newTelegramUri
+        val apkFile = File(filesDir, "received_files/telegram.apk")
+        if (!apkFile.exists()) {
+            step = Step.ERROR
+            runOnUiThread { updateUI() }
+            return
         }
+        val intent = Intent(Intent.ACTION_VIEW)
+        val uri = fileToUri(apkFile)
         intent.setDataAndType(uri, "application/vnd.android.package-archive")
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
         startActivity(intent)
     }
 
     private fun uninstallSelf() {
-        deleteFileByUri(dataUri)
-        deleteFileByUri(newTelegramUri)
-
         val intent = Intent(Intent.ACTION_DELETE)
         intent.data = Uri.parse("package:$packageName")
         startActivity(intent)
@@ -217,7 +224,7 @@ class MainActivity : AppCompatActivity() {
                     step = Step.INSTALL_NEW_APP
                     runOnUiThread{ updateUI() }
                 }
-            } else if (step != Step.COPY_FILES_FROM_OLD_TELEGRAM) {
+            } else if (step != Step.COPY_FILES_FROM_OLD_TELEGRAM && step != Step.OLD_TELEGRAM_FILES_CORRUPTED) {
                 break
             }
             Thread.sleep(100)
@@ -300,11 +307,30 @@ class MainActivity : AppCompatActivity() {
                 receiveFiles()
             }
         } else {
-            dataUri = intent.data
-            intent.getParcelableExtra<Uri>("telegramApk")?.let { newTelegramUri = it }
-            step = Step.UNINSTALL_OLD_APP
-            updateUI()
-            contract = TelegramActivityContract(dataUri, zipPassword)
+            val dataUri = intent.data
+            var exists = isUriExists(dataUri)
+            val newTelegramUri = intent.getParcelableExtra<Uri>("telegramApk")
+            exists = exists && isUriExists(newTelegramUri)
+            if (!exists) {
+                step = Step.OLD_TELEGRAM_FILES_CORRUPTED
+            } else {
+                val dir = File(filesDir, "received_files")
+                if (dir.exists()) {
+                    dir.deleteRecursively()
+                }
+                dir.mkdir()
+                dataUri?.path?.let {
+                    val dest = File(dir, "data.zip")
+                    File(it).renameTo(dest)
+                }
+                newTelegramUri?.path?.let {
+                    val dest = File(dir, "telegram.apk")
+                    File(it).renameTo(dest)
+                }
+                step = Step.UNINSTALL_OLD_APP
+                updateUI()
+                contract = TelegramActivityContract(dataUri, zipPassword)
+            }
         }
         localeOverride = intent.getStringExtra("language")
     }
@@ -316,9 +342,16 @@ class MainActivity : AppCompatActivity() {
             installNewApp()
         } else if (step == Step.COPY_FILES_TO_TELEGRAM) {
             findTelegramActivity()?.let {
+                if (!File(filesDir, "received_files/data.zip").exists()) {
+                    step = Step.ERROR
+                    runOnUiThread { updateUI() }
+                    return
+                }
                 try {
                     telegramLauncher.launch(it)
                 } catch (ignored: Exception) {
+                    step = Step.ERROR
+                    runOnUiThread { updateUI() }
                 }
             }
         } else if (step == Step.UNINSTALL_SELF) {
@@ -327,11 +360,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createTelegramLauncher() {
-        if (Build.VERSION.SDK_INT >= 24) {
-            contract = TelegramActivityContract(fileToUri(File(filesDir, "received_files/data.zip")), zipPassword)
-        } else if (dataUri != null) {
-            contract = TelegramActivityContract(dataUri, zipPassword)
-        }
+        contract = TelegramActivityContract(fileToUri(File(filesDir, "received_files/data.zip")), zipPassword)
         contract?.let {
             telegramLauncher = registerForActivityResult(it) { result ->
                 if (result) {
@@ -356,13 +385,7 @@ class MainActivity : AppCompatActivity() {
         return file
     }
 
-    private fun deleteFileByUri(uri: Uri?) {
-        uri?.let { u ->
-            u.path?.let { path ->
-                File(path).delete()
-            }
-        }
-    }
+    private fun isUriExists(uri: Uri?): Boolean =  uri?.path?.let { File(it).exists() } ?: false
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)

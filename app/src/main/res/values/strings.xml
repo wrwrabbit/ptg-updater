@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name" translatable="false">PtgUpdater</string>
     <string name="back_to_ptr_description">PtgUpdater should receive data from PTelegram. Go back to partisan Telegram and continue with the installation there for now.</string>
+    <string name="back_to_ptr_error_description">The data is corrupted. Go back to PTelegram and try again.</string>
 
     <string name="step4">Step 4</string>
     <string name="uninstall_old_telegram_app_description">PtgUpdater received all data from PTelegram. Now you need to uninstall it in order to install the new version. Don\'t worry, all your data including accounts, secret chats, partisan settings, false passcodes will be transferred to the new version of the app.</string>
@@ -18,4 +19,6 @@
     <string name="uninstall_updater_description">Telegram updated to version 3.0. PtgUpdater is no longer needed and can be removed.</string>
     <string name="uninstall_updater">Uninstall PtgUpdater</string>
 
+    <string name="stepError" translatable="false">:(</string>
+    <string name="error_description">Unfortunately, something went wrong. Try installing the new version of the app manually.</string>
 </resources>
