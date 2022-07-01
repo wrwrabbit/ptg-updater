@@ -20,7 +20,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toFile
-import androidx.core.net.toUri
 import net.lingala.zip4j.ZipFile
 import org.apache.commons.io.IOUtils
 import java.io.File
@@ -55,6 +54,12 @@ class MainActivity : AppCompatActivity() {
     private var telegramPackageName: String?
         get() = preferences.getString("telegramPackageName", null)
         set(x) { preferences.edit().putString("telegramPackageName", x).apply() }
+    private var dataUri: Uri?
+        get() = preferences.getString("dataUri", null)?.let { Uri.parse(it) }
+        set(x) { preferences.edit().putString("dataUri", x.toString()).apply() }
+    private var newTelegramUri: Uri?
+        get() = preferences.getString("newTelegramUri", null)?.let { Uri.parse(it) }
+        set(x) { preferences.edit().putString("newTelegramUri", x.toString()).apply() }
     private var step: Step
         get() = Step.valueOf(preferences.getString("step", "COPY_FILES_FROM_OLD_TELEGRAM")!!)
         set(x) { preferences.edit().putString("step", x.toString()).apply() }
@@ -86,8 +91,15 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         updateUI()
     }
-
     private fun receiveFiles() {
+        if (Build.VERSION.SDK_INT >= 24) {
+            receiveFilesNew()
+        } else {
+            receiveFilesOld()
+        }
+    }
+
+    private fun receiveFilesNew() {
         Thread {
             runOnUiThread { progressBar.visibility = View.VISIBLE }
             val zipFile = getFileAndDeleteIfExists("full.zip")
@@ -118,6 +130,32 @@ class MainActivity : AppCompatActivity() {
                 updateUI()
             }
         }.start()
+    }
+
+    private fun receiveFilesOld() {
+        dataUri = intent.data
+        var exists = isUriExists(dataUri)
+        newTelegramUri = intent.getParcelableExtra<Uri>("telegramApk")
+        exists = exists && isUriExists(newTelegramUri)
+        if (!exists) {
+            step = Step.OLD_TELEGRAM_FILES_CORRUPTED
+            updateUI()
+        } else {
+            val dir = File(filesDir, "received_files")
+            if (dir.exists()) {
+                dir.deleteRecursively()
+            }
+            dir.mkdir()
+            dataUri?.path?.let {
+                copyToInternal(it, File(dir, "data.zip"))
+            }
+            newTelegramUri?.path?.let {
+                copyToInternal(it, File(dir, "telegram.apk"))
+            }
+            step = Step.UNINSTALL_OLD_APP
+            updateUI()
+            contract = TelegramActivityContract(dataUri, zipPassword)
+        }
     }
 
     private fun copyFileFromTelegram(from: Uri, to: String) {
@@ -189,19 +227,35 @@ class MainActivity : AppCompatActivity() {
 
     private fun installNewApp() {
         val apkFile = File(filesDir, "received_files/telegram.apk")
-        if (!apkFile.exists()) {
-            step = Step.ERROR
-            runOnUiThread { updateUI() }
-            return
+        val uri = if (Build.VERSION.SDK_INT >= 24) {
+            fileToUri(apkFile)
+        } else {
+            newTelegramUri
+        }
+        if (!isUriExists(uri)) {
+            if (Build.VERSION.SDK_INT < 24) {
+                uriToFile(uri)?.let {
+                    apkFile.copyTo(it)
+                }
+            }
+            if (!isUriExists(uri)) {
+                step = Step.ERROR
+                runOnUiThread { updateUI() }
+                return
+            }
         }
         val intent = Intent(Intent.ACTION_VIEW)
-        val uri = fileToUri(apkFile)
         intent.setDataAndType(uri, "application/vnd.android.package-archive")
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
         startActivity(intent)
     }
 
     private fun uninstallSelf() {
+        if (Build.VERSION.SDK_INT < 24) {
+            deleteFileByUri(dataUri)
+            deleteFileByUri(newTelegramUri)
+        }
+
         val intent = Intent(Intent.ACTION_DELETE)
         intent.data = Uri.parse("package:$packageName")
         startActivity(intent)
@@ -299,40 +353,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveIntentData() {
-        if (Build.VERSION.SDK_INT >= 24) {
-            step = Step.COPY_FILES_FROM_OLD_TELEGRAM
-            if (ContextCompat.checkSelfPermission( this, android.Manifest.permission.READ_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED ) {
-                ActivityCompat.requestPermissions( this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 100)
-            } else {
-                receiveFiles()
-            }
+        step = Step.COPY_FILES_FROM_OLD_TELEGRAM
+        if (ContextCompat.checkSelfPermission( this, android.Manifest.permission.READ_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED ) {
+            ActivityCompat.requestPermissions( this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 100)
         } else {
-            val dataUri = intent.data
-            var exists = isUriExists(dataUri)
-            val newTelegramUri = intent.getParcelableExtra<Uri>("telegramApk")
-            exists = exists && isUriExists(newTelegramUri)
-            if (!exists) {
-                step = Step.OLD_TELEGRAM_FILES_CORRUPTED
-            } else {
-                val dir = File(filesDir, "received_files")
-                if (dir.exists()) {
-                    dir.deleteRecursively()
-                }
-                dir.mkdir()
-                dataUri?.path?.let {
-                    val dest = File(dir, "data.zip")
-                    File(it).renameTo(dest)
-                }
-                newTelegramUri?.path?.let {
-                    val dest = File(dir, "telegram.apk")
-                    File(it).renameTo(dest)
-                }
-                step = Step.UNINSTALL_OLD_APP
-                updateUI()
-                contract = TelegramActivityContract(dataUri, zipPassword)
-            }
+            receiveFiles()
         }
         localeOverride = intent.getStringExtra("language")
+    }
+
+    private fun copyToInternal(path: String, dest: File) {
+        val src = File(path)
+        src.copyTo(dest)
     }
 
     private fun onClickButton() {
@@ -342,10 +374,17 @@ class MainActivity : AppCompatActivity() {
             installNewApp()
         } else if (step == Step.COPY_FILES_TO_TELEGRAM) {
             findTelegramActivity()?.let {
-                if (!File(filesDir, "received_files/data.zip").exists()) {
-                    step = Step.ERROR
-                    runOnUiThread { updateUI() }
-                    return
+                if (Build.VERSION.SDK_INT < 24) {
+                    if (!isUriExists(dataUri)) {
+                        uriToFile(dataUri)?.let { uri ->
+                            File(filesDir, "received_files/data.zip").copyTo(uri)
+                        }
+                    }
+                    if (!isUriExists(dataUri)) {
+                        step = Step.ERROR
+                        runOnUiThread { updateUI() }
+                        return
+                    }
                 }
                 try {
                     telegramLauncher.launch(it)
@@ -360,7 +399,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createTelegramLauncher() {
-        contract = TelegramActivityContract(fileToUri(File(filesDir, "received_files/data.zip")), zipPassword)
+        if (Build.VERSION.SDK_INT >= 24) {
+            contract = TelegramActivityContract(fileToUri(File(filesDir, "received_files/data.zip")), zipPassword)
+        } else if (dataUri != null) {
+            contract = TelegramActivityContract(dataUri, zipPassword)
+        }
         contract?.let {
             telegramLauncher = registerForActivityResult(it) { result ->
                 if (result) {
@@ -385,14 +428,32 @@ class MainActivity : AppCompatActivity() {
         return file
     }
 
-    private fun isUriExists(uri: Uri?): Boolean =  uri?.path?.let { File(it).exists() } ?: false
+    private fun deleteFileByUri(uri: Uri?) {
+        uriToFile(uri)?.delete()
+    }
+
+    private fun uriToFile(uri: Uri?): File? {
+        return uri?.path?.let { File(it) }
+    }
+
+    private fun isUriExists(uri: Uri?): Boolean = uriToFile(uri)?.exists() ?: false
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 100) {
             if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                receiveFiles()
+                if (Build.VERSION.SDK_INT >= 24) {
+                    receiveFilesNew()
+                } else {
+                    if (ContextCompat.checkSelfPermission( this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED ) {
+                        ActivityCompat.requestPermissions( this, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 101)
+                    } else {
+                        receiveFiles()
+                    }
+                }
             }
+        } else if (requestCode == 101) {
+            receiveFiles()
         }
     }
 }
