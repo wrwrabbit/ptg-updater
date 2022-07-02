@@ -232,17 +232,21 @@ class MainActivity : AppCompatActivity() {
         } else {
             newTelegramUri
         }
-        if (!isUriExists(uri)) {
-            if (Build.VERSION.SDK_INT < 24) {
+        var exists = true
+        if (Build.VERSION.SDK_INT < 24) {
+            if (!isUriExists(uri)) {
                 uriToFile(uri)?.let {
                     apkFile.copyTo(it)
                 }
+                exists = isUriExists(uri)
             }
-            if (!isUriExists(uri)) {
-                step = Step.ERROR
-                runOnUiThread { updateUI() }
-                return
-            }
+        } else {
+            exists = apkFile.exists()
+        }
+        if (!exists) {
+            step = Step.ERROR
+            runOnUiThread { updateUI() }
+            return
         }
         val intent = Intent(Intent.ACTION_VIEW)
         intent.setDataAndType(uri, "application/vnd.android.package-archive")
