@@ -19,5 +19,5 @@
     <string name="uninstall_updater_description">PTelegram обновлён до версии 3.0. PtgUpdater теперь не нужен и его можно удалить.</string>
     <string name="uninstall_updater">Удалить приложение PtgUpdater</string>
 
-    <string name="error_description">К сожалению, что-то пошло не так. Попробуйте установить новую версию приложения вручную.</string>
+    <string name="error_description">К сожалению, что-то пошло не так. Скачайте новую версию приложения из нашего телеграм канала https://t.me/cpartisans_security и установите вручную.</string>
 </resources>
