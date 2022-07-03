@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="back_to_ptr_description">PtgUpdater павінен атрымаць дадзеныя ад PTelegram. Калі ласка, вярніцеся ў партызанскі Тэлеграм і працягніце ўстаноўку там пакуль што.</string>
+    <string name="back_to_ptr_error_description">Дадзеныя пашкоджаны. Калі ласка, вярніцеся ў PТelegram і паспрабуйце яшчэ раз.</string>
+
+    <string name="step4">Крок 4</string>
+    <string name="uninstall_old_telegram_app_description">PtgUpdater атрымаў усе дадзеныя ад PTelegram. Зараз неабходна выдаліць яго, каб усталяваць новую версію. Не хвалюйцеся, усе вашыя дадзеныя, уключаючы акаўнты, сакрэтныя чаты, партызанскія налады, несапраўдныя кады блакіроўкі будуць перанесены ў новую версію прыкладання.</string>
+    <string name="uninstall_old_telegram_app">Выдаліць стары партызанскі тэлеграм</string>
+
+    <string name="step5">Крок 5</string>
+    <string name="install_new_telegram_app_description">Старая версія PTelegram выдалена. Зараз неабходна ўсталяваць PTelegram 3.0. Пасля ўстаноўкі вярніцеся назад у PtgUpdater, каб перадаць дадзеныя.</string>
+    <string name="install_new_telegram_app">Усталяваць новы партызанскі тэлеграм</string>
+
+    <string name="step6">Крок 6</string>
+    <string name="transfer_files_to_telegram_description">Новая версія PTelegram усталявана, але яна пакуль пустая. Давайце напоўнім яе дадзенымі са старой версіі.</string>
+    <string name="transfer_files_to_telegram">Скапіяваць дадзеныя ў новы тэлеграм</string>
+
+    <string name="step7">Віншуем!</string>
+    <string name="uninstall_updater_description">PTelegram абноўлены да версіі 3.0. PtgUpdater зараз не патрэбен і яго можна выдаліць.</string>
+    <string name="uninstall_updater">Выдаліць прыкладанне PtgUpdater</string>
+
+    <string name="error_description">Нажаль, нешта пайшло не так. Запампуйце новую версію прыкладання з нашага тэлеграм канала https://t.me/cpartisans_security і ўсталюеце ўручную.</string>
+</resources>
