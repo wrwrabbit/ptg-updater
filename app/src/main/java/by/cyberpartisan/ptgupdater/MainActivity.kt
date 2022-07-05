@@ -281,7 +281,14 @@ class MainActivity : AppCompatActivity() {
                 if (!isTelegramInstalled()) {
                     step = Step.INSTALL_NEW_APP
                     runOnUiThread{ updateUI() }
+                } else if (Build.VERSION.SDK_INT < 24) {
+                    if (checkCopiedFile()) {
+                        step = Step.UNINSTALL_SELF
+                        runOnUiThread{ updateUI() }
+                    }
                 }
+            } else if (step == Step.UNINSTALL_SELF && Build.VERSION.SDK_INT < 24) {
+                checkCopiedFile()
             } else if (step != Step.COPY_FILES_FROM_OLD_TELEGRAM && step != Step.OLD_TELEGRAM_FILES_CORRUPTED) {
                 break
             }
@@ -319,6 +326,17 @@ class MainActivity : AppCompatActivity() {
         } else {
             Uri.fromFile(file)
         }
+    }
+
+    private fun checkCopiedFile(): Boolean {
+        return dataUri?.path?.let {
+            val copiedFile = File(File(it).parentFile, "copied")
+            if (copiedFile.exists()) {
+                copiedFile.delete()
+                return true
+            }
+            return false
+        } ?: false
     }
 
     @Suppress("DEPRECATION")
