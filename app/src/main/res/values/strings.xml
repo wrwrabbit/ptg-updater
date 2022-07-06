@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name" translatable="false">PtgUpdater</string>
+    <string name="back_to_ptr_description">PtgUpdater should receive data from PTelegram. Go back to partisan Telegram and continue with the installation there for now.</string>
+    <string name="back_to_ptr_error_description">The data is corrupted. Go back to PTelegram and try again.</string>
+
+    <string name="step4">Step 4</string>
+    <string name="uninstall_old_telegram_app_description">PtgUpdater received all data from PTelegram. Now you need to uninstall PTelegram in order to install the new version. Don\'t worry, all your data including accounts, secret chats, partisan settings, false passcodes will be transferred to the new version of the app.</string>
+    <string name="uninstall_old_telegram_app">Uninstall Old Telegram App</string>
+
+    <string name="step5">Step 5</string>
+    <string name="install_new_telegram_app_description">The old version of PTelegram has been removed. Now you need to install PTelegram 3.0. Once installed, go back to PtgUpdater to transfer the data.</string>
+    <string name="install_new_telegram_app">Install New Telegram App</string>
+
+    <string name="step6">Step 6</string>
+    <string name="transfer_files_to_telegram_description">The new version of PTelegram is installed, but it is still empty. Let\'s fill it with data from the old version.</string>
+    <string name="transfer_files_to_telegram">Copy Files to Telegram</string>
+
+    <string name="step7">Congratulations!</string>
+    <string name="uninstall_updater_description">Telegram updated to version 3.0. PtgUpdater is no longer needed and can be removed.</string>
+    <string name="uninstall_updater">Uninstall PtgUpdater</string>
+
+    <string name="stepError" translatable="false">:(</string>
+    <string name="error_description">Unfortunately, something went wrong. Download the new version of the application from our telegram channel https://t.me/cpartisans_security and install it manually.</string>
+</resources>
