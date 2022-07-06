@@ -4,7 +4,7 @@
     <string name="back_to_ptr_error_description">The data is corrupted. Go back to PTelegram and try again.</string>
 
     <string name="step4">Step 4</string>
-    <string name="uninstall_old_telegram_app_description">PtgUpdater received all data from PTelegram. Now you need to uninstall it in order to install the new version. Don\'t worry, all your data including accounts, secret chats, partisan settings, false passcodes will be transferred to the new version of the app.</string>
+    <string name="uninstall_old_telegram_app_description">PtgUpdater received all data from PTelegram. Now you need to uninstall PTelegram in order to install the new version. Don\'t worry, all your data including accounts, secret chats, partisan settings, false passcodes will be transferred to the new version of the app.</string>
     <string name="uninstall_old_telegram_app">Uninstall Old Telegram App</string>
 
     <string name="step5">Step 5</string>
