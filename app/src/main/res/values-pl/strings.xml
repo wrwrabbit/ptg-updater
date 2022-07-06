@@ -1,0 +1,23 @@
+<?xml version="1.0" kodowanie="utf-8"?>
+<resources>
+    <string name="back_to_ptr_description">PtgUpdater powinien otrzymać dane z PTelegrama. Wróć do partyzanckiego Telegrama i na razie kontynuuj instalację.</string>
+    <string name="back_to_ptr_error_description">Dane są uszkodzone. Wróć do PTelegrama i spróbuj ponownie.</string>
+
+    <string name="step4">Krok 4</string>
+    <string name="uninstall_old_telegram_app_description">PtgUpdater odebrał wszystkie dane z PTelegrama. Teraz musisz odinstalować PTelegram, aby zainstalować nową wersję. Nie martw się, wszystkie Twoje dane, w tym konta, tajne czaty, ustawienia partyzantów, fałszywe hasła zostaną przeniesione do nowej wersji aplikacji.</string>
+    <string name="uninstall_old_telegram_app">Odinstaluj stary telegram partyzantów</string>
+
+    <string name="step5">Krok 5</string>
+    <string name="install_new_telegram_app_description">Stara wersja PTelegrama została usunięta. Teraz musisz zainstalować PTelegram 3.0. Po zainstalowaniu przełącz się z powrotem na PtgUpdater, aby przesłać dane.</string>
+    <string name="install_new_telegram_app">Zainstaluj nowy telegram partyzancki</string>
+
+    <string name="step6">Krok 6</string>
+    <string name="transfer_files_to_telegram_description">Nowa wersja PTelegrama jest zainstalowana, ale nadal jest pusta. Wypełnijmy go danymi ze starej wersji.</string>
+    <string name="transfer_files_to_telegram">Skopiuj dane do nowego telegramu</string>
+
+    <string name="step7">Gratulacje!</string>
+    <string name="uninstall_updater_description">PTelegram został zaktualizowany do wersji 3.0. PtgUpdater nie jest już potrzebny i można go usunąć.</string>
+    <string name="uninstall_updater">Odinstaluj PtgUpdater</string>
+
+    <string name="error_description">Przepraszamy, coś poszło nie tak. Pobierz nową wersję aplikacji z naszego kanału telegramów https://t.me/cpartisans_security i zainstaluj ją ręcznie.</string>
+</resources>
