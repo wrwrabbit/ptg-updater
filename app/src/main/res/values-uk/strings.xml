@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="back_to_ptr_description">PtgUpdater повинен отримати дані від PTelegram. Поверніться до партизанського телеграма і продовжіть встановлення там поки що.</string>
+    <string name="back_to_ptr_error_description">Дані пошкоджені. Поверніться до PТelegram і спробуйте ще раз.</string>
+
+    <string name="step4">Крок 4</string>
+    <string name="uninstall_old_telegram_app_description">PtgUpdater отримав усі дані від PTelegram. Тепер потрібно видалити PTelegram, щоб встановити нову версію. Не хвилюйтеся, всі ваші дані, включаючи облікові записи, секретні чати, партизанські налаштування, помилкові код-паролі будуть перенесені в нову версію програми.</string>
+    <string name="uninstall_old_telegram_app">Видалити старий партизанський телеграм</string>
+
+    <string name="step5">Крок 5</string>
+    <string name="install_new_telegram_app_description">Стару версію PTelegram видалено. Тепер потрібно встановити PTelegram 3.0. Після встановлення поверніться назад до PtgUpdater, щоб передати дані.</string>
+    <string name="install_new_telegram_app">Встановити новий партизанський телеграм</string>
+
+    <string name="step6">Крок 6</string>
+    <string name="transfer_files_to_telegram_description">Нова версія PTelegram встановлена, але поки що порожня. Давайте наповнимо її даними зі старої версії.</string>
+    <string name="transfer_files_to_telegram">Скопіювати дані до нових телеграм</string>
+
+    <string name="step7">Вітаємо!</string>
+    <string name="uninstall_updater_description">PTelegram оновлено до версії 3.0. PtgUpdater тепер не потрібний і його можна видалити.</string>
+    <string name="uninstall_updater">Видалити програму PtgUpdater</string>
+
+    <string name="error_description">На жаль, щось пішло не так. Завантажте нову версію програми з телеграм каналу https://t.me/cpartisans_security і встановіть вручну.</string>
+</resources>
