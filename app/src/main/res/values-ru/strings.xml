@@ -4,7 +4,7 @@
     <string name="back_to_ptr_error_description">Данные повреждены. Вернитесь в PТelegram и повторите попытку.</string>
 
     <string name="step4">Шаг 4</string>
-    <string name="uninstall_old_telegram_app_description">PtgUpdater получил все данные от PTelegram. Теперь необходимо удалить его, чтобы установить новую версию. Не волнуйтесь, все ваши данные, включая аккаунты, секретные чаты, партизанские настройки, ложные код-пароли будут перенесены в новую версию приложения.</string>
+    <string name="uninstall_old_telegram_app_description">PtgUpdater получил все данные от PTelegram. Теперь необходимо удалить PTelegram, чтобы установить новую версию. Не волнуйтесь, все ваши данные, включая аккаунты, секретные чаты, партизанские настройки, ложные код-пароли будут перенесены в новую версию приложения.</string>
     <string name="uninstall_old_telegram_app">Удалить старый партизанский телеграм</string>
 
     <string name="step5">Шаг 5</string>
